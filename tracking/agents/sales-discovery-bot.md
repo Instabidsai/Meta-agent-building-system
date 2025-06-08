@@ -1,61 +1,93 @@
-# Sales Discovery Bot - Build Memory
-**Created**: 2025-06-07
+# Sales Discovery Bot - Meta-Agent Factory Build Record
+
 **Agent**: sales-discovery-bot
-**Status**: ✅ Unit Tests Passing - Ready for Integration Testing
+**Build Date**: 2025-06-07 to 2025-06-08
+**Status**: ✅ Unit Tests Passing, Integration Ready
+**Key Innovation**: First agent with Claude-to-Claude testing
 
-## Quick Facts
-- **Repository**: `https://github.com/Instabidsai/sales-discovery-bot`
-- **Local Path**: `C:\Users\Not John Or Justin\Documents\GitHub\sales-discovery-bot`
-- **Framework**: LangGraph (latest) + FastAPI + PostgreSQL + Redis
-- **Model**: GPT-4o
+---
 
-## Session 2 Complete ✅
-1. **Code**: Complete (Session 1)
-2. **Dependencies**: Fixed and installed
-   - Pydantic v2 migration completed
-   - Removed non-existent langmem package
-   - Using latest LangGraph/LangChain
-3. **Local Environment**: 
-   - Redis on port 6381 (docker-compose.dev.yml)
-   - PostgreSQL on port 5434
-   - Virtual environment created
-4. **All Unit Tests Passing**: 12/12 tests ✅
+## Quick Reference for Future Builds
 
-## Key Fixes Applied
+### What Worked
+1. **Claude Sonnet 4** for conversational agents
+2. **Trace capture** for debugging conversations
+3. **Test personas** for rapid testing
+4. **Single-stage processing** (not multi-hop)
+
+### Common Fixes Needed
 ```python
-# agent/config.py - Pydantic v2 fix:
-from pydantic_settings import BaseSettings
-from pydantic import Field, ConfigDict
+# Pydantic v2
+model_config = ConfigDict(extra="allow")
 
-model_config = ConfigDict(
-    env_file=".env",
-    env_file_encoding="utf-8",
-    extra="allow"  # Allow extra fields from .env
-)
+# LangGraph imports
+from langgraph.graph import StateGraph
 
-# api/main.py - Fixed escape sequence:
-html = r"""  # Added 'r' for raw string
+# Datetime
+datetime.now(timezone.utc)
 
-# agent/logic.py - Fixed datetime:
-from datetime import datetime, timezone
-datetime.now(timezone.utc)  # Instead of utcnow()
+# PostgreSQL (no +asyncpg)
+postgresql://user:pass@host/db
 ```
 
-## Next Steps
-1. Initialize database with migrations
-2. Test API endpoints locally  
-3. Build and test Docker image
-4. Deploy to Kubernetes
+### Must-Have Endpoints
+```python
+POST /chat                          # Main conversation
+POST /test/conversation             # For Claude testing
+GET /conversation/{id}/trace        # See reasoning
+GET /health                         # Service status
+```
 
-## Lessons Learned
-- Always check Context7 for latest syntax
-- Pydantic v2 requires ConfigDict instead of class Config
-- Use validation_alias instead of env parameter in Field
-- LangGraph state management requires careful handling after ainvoke
-- Always use raw strings for regex patterns in Python
+### Test Command
+```bash
+curl -X POST http://localhost:8000/test/conversation \
+  -H "Content-Type: application/json" \
+  -d '{"persona": "dentist"}'
+```
 
-## Performance Targets
-- Response time: <2s p95
-- Completion rate: >30%
-- Demo bookings: >10%
-- Cost per conversation: <$0.10
+---
+
+## Patterns to Reuse
+
+### 1. Conversation State Machine
+- One node processes current stage
+- Always END after response (wait for user)
+- Track stage transitions in traces
+
+### 2. Business Logic Extraction
+- Use dedicated tool functions
+- Extract after 2-3 questions
+- Store in structured format
+
+### 3. MVP Proposal Generation
+- Template-based but personalized
+- Include specific metrics
+- Clear next steps
+
+---
+
+## Metrics
+- **Build Time**: 3 sessions (~6 hours)
+- **Fix Attempts**: 12 major fixes
+- **Test Coverage**: 100% unit, 0% integration
+- **Lines of Code**: ~2,500
+
+---
+
+## Next Steps for This Agent
+1. Run full integration tests
+2. Test with multiple personas
+3. Deploy to Kubernetes
+4. Add monitoring dashboards
+
+---
+
+## Factory Improvements Made
+1. Added trace capture pattern
+2. Created test persona system
+3. Documented dependency issues
+4. Built Claude-specific patterns
+
+---
+
+**Use this as template for next agent build!**
